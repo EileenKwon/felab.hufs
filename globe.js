@@ -35,6 +35,12 @@ function vec(lat, lon) {
   var c = Math.cos(lat * RAD);
   return [c * Math.cos(lon * RAD), c * Math.sin(lon * RAD), Math.sin(lat * RAD)];
 }
+// Longitude and latitude (degrees) that a vector points at; length is ignored.
+function lonLat(v) {
+  var n = Math.hypot(v[0], v[1], v[2]) || 1;
+  return [Math.atan2(v[1], v[0]) / RAD, Math.asin(Math.max(-1, Math.min(1, v[2] / n))) / RAD];
+}
+function clampLat(x) { return Math.max(-80, Math.min(80, x)); }
 function slerp(a, b, t) {
   var d = Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]));
   var w = Math.acos(d), s = Math.sin(w);
@@ -137,9 +143,8 @@ trips.forEach(function (t, i) {
 (function () {
   var c = [0, 0, 0];
   trips.forEach(function (t) { t.vecs.forEach(function (v) { c[0] += v[0]; c[1] += v[1]; c[2] += v[2]; }); });
-  var n = Math.sqrt(c[0] * c[0] + c[1] * c[1] + c[2] * c[2]) || 1;
-  view.lon = Math.atan2(c[1], c[0]) / RAD;
-  view.lat = Math.asin(c[2] / n) / RAD;
+  var ll = lonLat(c);
+  view.lon = ll[0]; view.lat = ll[1];
   setRot();
 })();
 
@@ -297,21 +302,87 @@ function hit(mx, my) {
 var drag = null, idleSince = 0, tween = null;
 function pos(e) { var b = canvas.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; }
 
+// Zoom by a factor, keeping the point at (sx, sy) roughly where it is: the view
+// centre slides a little towards it, so zooming in homes in on what the mouse
+// or the fingers are over. Used by the wheel, pinch, double-tap and buttons.
+function zoomAt(sx, sy, factor) {
+  var next = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zoom * factor));
+  if (next === zoom) return;
+  setRot();
+  var under = (sx == null) ? null : unproject(sx, sy);
+  var f = 1 - zoom / next;
+  zoom = next;
+  R = radius();
+  if (under && f > 0) {
+    var ll = lonLat(slerp(vec(view.lat, view.lon), under, f));
+    view.lon = ll[0]; view.lat = clampLat(ll[1]);
+  }
+  tween = null;
+  idleSince = performance.now();
+  needs = true;
+}
+function unproject(sx, sy) {
+  var y = (sx - CX) / R, z = (CY - sy) / R, x2 = 1 - y * y - z * z;
+  if (x2 < 0) return null;
+  var x = Math.sqrt(x2);
+  // Undo the tilt, then the spin (inverse of rot).
+  var x1 = x * cp - z * sp, z1 = x * sp + z * cp, y1 = y;
+  return [x1 * cl - y1 * sl, x1 * sl + y1 * cl, z1];
+}
+
+// Pointers: the mouse or one finger turns the globe (or taps a route); two
+// fingers pinch to zoom and drag to turn. The canvas has touch-action: none,
+// so the browser never starts scrolling under a pinch; instead a one-finger
+// swipe that begins mostly vertically scrolls the page from here. A quick
+// double tap zooms in on that spot.
+var pointers = {}, pinch = null, lastTap = null;
+function count() { return Object.keys(pointers).length; }
+function startDrag(m, e) {
+  drag = { x: m.x, y: m.y, lon: view.lon, lat: view.lat, moved: false, mode: e && e.pointerType !== 'mouse' ? null : 'turn', lastY: e ? e.clientY : 0 };
+}
+function pinchGeom() {
+  var ids = Object.keys(pointers), a = pointers[ids[0]], b = pointers[ids[1]];
+  return { dist: Math.hypot(a.x - b.x, a.y - b.y) || 1, mid: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 } };
+}
+function startPinch() {
+  pinch = pinchGeom();
+  startDrag(pinch.mid);
+  drag.moved = true;
+}
+
 canvas.addEventListener('pointerdown', function (e) {
   if (e.button !== 0 && e.pointerType === 'mouse') return;
   var m = pos(e);
-  drag = { x: m.x, y: m.y, lon: view.lon, lat: view.lat, moved: false };
-  tween = null;
+  pointers[e.pointerId] = m;
   canvas.setPointerCapture(e.pointerId);
+  tween = null;
+  if (count() >= 2) startPinch(); else startDrag(m, e);
 });
 canvas.addEventListener('pointermove', function (e) {
   var m = pos(e);
+  if (pointers[e.pointerId]) pointers[e.pointerId] = m;
+  if (pinch && count() >= 2) {
+    var g = pinchGeom();
+    if (Math.abs(g.dist / pinch.dist - 1) > 0.01) { zoomAt(g.mid.x, g.mid.y, g.dist / pinch.dist); pinch.dist = g.dist; }
+    m = g.mid;
+  }
   if (drag) {
     var dx = m.x - drag.x, dy = m.y - drag.y;
     if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+    if (!drag.mode) {
+      // A finger: wait to see which way it goes. Mostly vertical means the
+      // reader wants the page, not the globe.
+      if (Math.abs(dx) + Math.abs(dy) < 6) return;
+      drag.mode = Math.abs(dy) > Math.abs(dx) * 1.2 ? 'scroll' : 'turn';
+    }
+    if (drag.mode === 'scroll') {
+      window.scrollBy(0, drag.lastY - e.clientY);
+      drag.lastY = e.clientY;
+      return;
+    }
     var k = 70 / R;
     view.lon = drag.lon - dx * k;
-    view.lat = Math.max(-80, Math.min(80, drag.lat + dy * k));
+    view.lat = clampLat(drag.lat + dy * k);
     needs = true;
     return;
   }
@@ -321,49 +392,54 @@ canvas.addEventListener('pointermove', function (e) {
   canvas.style.cursor = h ? 'pointer' : 'grab';
   idleSince = performance.now();
 });
+function release(e) {
+  delete pointers[e.pointerId];
+  if (pinch && count() < 2) {
+    pinch = null;
+    drag = null;
+    for (var k in pointers) startDrag(pointers[k]);   // carry on turning with the finger that stays
+    if (drag) { drag.moved = true; drag.mode = 'turn'; }
+  }
+}
 canvas.addEventListener('pointerup', function (e) {
-  if (!drag) return;
+  release(e);
+  if (!drag || count()) return;
   var moved = drag.moved; drag = null;
   idleSince = performance.now();
   if (moved) return;
-  var m = pos(e), h = hit(m.x, m.y);
+  var m = pos(e), now = performance.now();
+  if (lastTap && now - lastTap.t < 350 && Math.hypot(m.x - lastTap.x, m.y - lastTap.y) < 24) {
+    lastTap = null;
+    zoomAt(m.x, m.y, zoom >= ZOOM_MAX - 0.01 ? ZOOM_MIN / zoom : 1.6);
+    return;
+  }
+  lastTap = { x: m.x, y: m.y, t: now };
+  var h = hit(m.x, m.y);
   select(h === selected ? null : h);
 });
-canvas.addEventListener('pointercancel', function () { drag = null; });
-
-// Wheel over the globe zooms in and out, towards the point under the cursor;
-// wheel outside the disc scrolls the page as usual.
-function unproject(sx, sy) {
-  var y = (sx - CX) / R, z = (CY - sy) / R, x2 = 1 - y * y - z * z;
-  if (x2 < 0) return null;
-  var x = Math.sqrt(x2);
-  // Undo the tilt, then the spin (inverse of rot).
-  var x1 = x * cp - z * sp, z1 = x * sp + z * cp, y1 = y;
-  return [x1 * cl - y1 * sl, x1 * sl + y1 * cl, z1];
+// A pointer whose capture is lost without an up (e.g. the tab switching) must
+// not linger, or the next pinch would count three fingers.
+function cancel(e) {
+  if (!pointers[e.pointerId]) return;
+  release(e);
+  if (!count()) { drag = null; pinch = null; }
 }
+canvas.addEventListener('pointercancel', cancel);
+canvas.addEventListener('lostpointercapture', cancel);
+
+// Wheel over the globe zooms; outside the disc it scrolls the page as usual.
 canvas.addEventListener('wheel', function (e) {
   var m = pos(e);
   if (Math.hypot(m.x - CX, m.y - CY) > R) return;
   e.preventDefault();
   var dy = e.deltaMode === 1 ? e.deltaY * 30 : e.deltaMode === 2 ? e.deltaY * 300 : e.deltaY;
-  var next = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zoom * Math.exp(-dy * 0.0016)));
-  if (next === zoom) return;
-  setRot();
-  var under = unproject(m.x, m.y);
-  var f = 1 - zoom / next;
-  zoom = next;
-  R = radius();
-  if (under && f > 0) {
-    // Slide the view centre a little towards the point under the cursor, so
-    // zooming in homes in on what the mouse is over.
-    var c = slerp(vec(view.lat, view.lon), under, f);
-    view.lon = Math.atan2(c[1], c[0]) / RAD;
-    view.lat = Math.max(-80, Math.min(80, Math.asin(Math.max(-1, Math.min(1, c[2]))) / RAD));
-  }
-  tween = null;
-  idleSince = performance.now();
-  needs = true;
+  zoomAt(m.x, m.y, Math.exp(-dy * 0.0016));
 }, { passive: false });
+
+// The + / − buttons, for touch screens and anyone without a wheel.
+Array.prototype.forEach.call(wrap.querySelectorAll('.globe-zoom button'), function (b) {
+  b.addEventListener('click', function () { zoomAt(null, null, b.getAttribute('data-zoom') === 'in' ? 1.5 : 1 / 1.5); });
+});
 canvas.addEventListener('pointerleave', function () { if (hover) { hover = null; needs = true; } });
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && selected) select(null); });
 
@@ -381,10 +457,9 @@ function select(t) {
   hover = null;
   if (t) {
     // Turn the globe so the whole route is in front, then let the photos out.
-    var m = t.mid, n = Math.hypot(m[0], m[1], m[2]);
-    var toLon = Math.atan2(m[1], m[0]) / RAD, toLat = Math.asin(m[2] / n) / RAD;
-    var dLon = ((toLon - view.lon + 540) % 360) - 180;
-    tween = { t0: performance.now(), dur: reduceMotion ? 0 : 650, lon0: view.lon, lat0: view.lat, lon1: view.lon + dLon, lat1: toLat };
+    var to = lonLat(t.mid);
+    var dLon = ((to[0] - view.lon + 540) % 360) - 180;
+    tween = { t0: performance.now(), dur: reduceMotion ? 0 : 650, lon0: view.lon, lat0: view.lat, lon1: view.lon + dLon, lat1: to[1] };
     showPhotos(t);
   } else {
     hidePhotos();

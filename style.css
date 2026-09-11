@@ -959,7 +959,9 @@ details.bib > pre {
 
 .globe-stage canvas {
 	display: block;
-	touch-action: pan-y;
+	/* No browser gestures on the globe: globe.js turns it, pinches it, and
+	   scrolls the page itself for a one-finger vertical swipe. */
+	touch-action: none;
 	user-select: none;
 	-webkit-user-select: none;
 }
@@ -1024,6 +1026,30 @@ details.bib > pre {
 }
 
 .gphoto:hover { border-color: #0B3D6E; z-index: 2; }
+
+/* Zoom buttons in the corner of the stage; the wheel and pinch do the same. */
+.globe-zoom {
+	position: absolute;
+	right: 0;
+	bottom: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.globe-zoom button {
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	font: 18px/1 Palatino, "Palatino Linotype", "Book Antiqua", serif;
+	border: 1px solid #CBD5E1;
+	border-radius: 0;
+	background: #fff;
+	color: #0B3D6E;
+	cursor: pointer;
+}
+
+.globe-zoom button:hover { border-color: #0B3D6E; }
 
 .globe-trips {
 	display: flex;

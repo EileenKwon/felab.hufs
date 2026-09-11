@@ -18,10 +18,10 @@ const SESSION_TTL = 12 * 60 * 60 * 1000;
 const MIN_PASSWORD = 8;
 const DEFAULT_PASSWORD = 'felab';
 const IMAGE_EXT = new Set(['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp']);
-// Files the preview may serve from the site root: pages, styles, and the
-// generated favicon, sitemap, feed and BibTeX. admin/ and data/ stay blocked
-// by the path checks in serveStatic.
-const ROOT_EXT = new Set(['.html', '.css', '.ico', '.xml', '.txt', '.bib']);
+// Files the preview may serve from the site root: pages, styles, the globe
+// script, and the generated favicon, sitemap, feed and BibTeX. admin/ and
+// data/ stay blocked by the path checks in serveStatic.
+const ROOT_EXT = new Set(['.html', '.css', '.js', '.ico', '.xml', '.txt', '.bib']);
 
 // Config / password ----------------------------------------------------------
 
@@ -120,6 +120,7 @@ function isJson(req) { return /^application\/json\b/i.test(req.headers['content-
 
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif',
   '.svg': 'image/svg+xml', '.webp': 'image/webp', '.ico': 'image/x-icon',
   '.xml': 'application/xml; charset=utf-8', '.txt': 'text/plain; charset=utf-8',
@@ -140,6 +141,7 @@ function send(res, code, body, type) {
   res.end(body);
 }
 function json(res, code, obj) { send(res, code, JSON.stringify(obj), 'application/json; charset=utf-8'); }
+function html(res, code, body) { send(res, code, body, MIME['.html']); }
 function redirect(res, to, cookie) {
   const h = { ...BASE_HEADERS, Location: to };
   if (cookie) h['Set-Cookie'] = cookie;
@@ -203,14 +205,14 @@ async function handle(req, res) {
   if (req.method === 'POST' && p.startsWith('/api/') && !isJson(req)) return json(res, 415, { error: 'expected application/json' });
 
   if (p === '/admin/login') {
-    if (req.method === 'GET') return send(res, 200, loginPage(''), 'text/html; charset=utf-8');
-    if (loginLocked()) return send(res, 429, loginPage('Too many attempts. Try again in a minute.'), 'text/html; charset=utf-8');
+    if (req.method === 'GET') return html(res, 200, loginPage(''));
+    if (loginLocked()) return html(res, 429, loginPage('Too many attempts. Try again in a minute.'));
     const body = new URLSearchParams((await readBody(req)).toString());
     const ok = checkPassword(body.get('password') || '');
     noteLogin(ok);
     if (ok) return redirect(res, '/admin', `sid=${newSession()}; HttpOnly; SameSite=Strict; Path=/`);
     await new Promise(r => setTimeout(r, 1000));
-    return send(res, 401, loginPage('Wrong password.'), 'text/html; charset=utf-8');
+    return html(res, 401, loginPage('Wrong password.'));
   }
   if (p === '/admin/logout') {
     const t = sessionToken(req); if (t) sessions.delete(t);
@@ -224,14 +226,19 @@ async function handle(req, res) {
   }
 
   if (p === '/admin' || p === '/admin/') {
-    return send(res, 200, fs.readFileSync(ADMIN_HTML), 'text/html; charset=utf-8');
+    return html(res, 200, fs.readFileSync(ADMIN_HTML));
+  }
+  // API bodies are JSON (checked above) and parsed once here; the routes that
+  // take no body get {}.
+  let d = {};
+  if (req.method === 'POST' && p.startsWith('/api/')) {
+    try { d = JSON.parse((await readBody(req)).toString('utf8') || '{}'); } catch (e) { d = null; }
+    if (!d || typeof d !== 'object') return json(res, 400, { error: 'invalid JSON' });
   }
   if (p === '/api/data' && req.method === 'GET') {
     return send(res, 200, fs.readFileSync(DATA), 'application/json; charset=utf-8');
   }
   if (p === '/api/data' && req.method === 'POST') {
-    let d;
-    try { d = JSON.parse((await readBody(req)).toString('utf8')); } catch (e) { return json(res, 400, { error: 'invalid JSON' }); }
     const err = validateData(d);
     if (err) return json(res, 400, { error: err });
     fs.copyFileSync(DATA, DATA + '.bak');
@@ -240,8 +247,6 @@ async function handle(req, res) {
     return json(res, 200, { ok: true });
   }
   if (p === '/api/upload' && req.method === 'POST') {
-    let d;
-    try { d = JSON.parse((await readBody(req)).toString('utf8')); } catch (e) { return json(res, 400, { error: 'invalid JSON' }); }
     const name = String(d.name || '').toLowerCase().replace(/[^a-z0-9._-]/g, '');
     const ext = path.extname(name);
     if (!name || !IMAGE_EXT.has(ext)) return json(res, 400, { error: 'image files only (jpg, png, gif, svg, webp)' });
@@ -254,8 +259,6 @@ async function handle(req, res) {
     return json(res, 200, { ok: true, path: 'images/' + (folder ? folder + '/' : '') + name });
   }
   if (p === '/api/password' && req.method === 'POST') {
-    let d;
-    try { d = JSON.parse((await readBody(req)).toString('utf8')); } catch (e) { return json(res, 400, { error: 'invalid JSON' }); }
     if (!checkPassword(String(d.current || ''))) return json(res, 403, { error: 'current password is wrong' });
     if (String(d.next || '').length < MIN_PASSWORD) return json(res, 400, { error: `new password must be at least ${MIN_PASSWORD} characters` });
     if (String(d.next) === DEFAULT_PASSWORD) return json(res, 400, { error: 'choose a password other than the initial one' });
