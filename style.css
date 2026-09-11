@@ -340,11 +340,13 @@ dl.projects dd {
 	font-size: 0.95em;
 }
 
-.bio .links {
+.bio .links,
+.person-detail .links {
 	margin-top: 4px;
 }
 
-.bio .links a {
+.bio .links a,
+.person-detail .links a {
 	display: inline-block;
 	color: #0B3D6E;
 	border: none;
@@ -352,11 +354,13 @@ dl.projects dd {
 	margin-right: 8px;
 }
 
-.bio .links a:hover {
+.bio .links a:hover,
+.person-detail .links a:hover {
 	color: #072B4F;
 }
 
-.bio .links svg {
+.bio .links svg,
+.person-detail .links svg {
 	display: block;
 }
 
@@ -709,7 +713,7 @@ dl.news .tag {
 	float: left;
 	width: 150px;
 	height: 190px;
-	margin: 4px 24px 10px 0;
+	margin: 4px 34px 10px 0;
 	background: #EEE;
 	border: 1px solid #DDD;
 }
