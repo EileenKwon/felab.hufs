@@ -353,21 +353,32 @@ function pagePersonDetail(data, p, roleLabel) {
   const id = personId(p);
   const desc = `${stripTags(p.name)}${roleLabel ? `, ${stripTags(roleLabel)}` : ''} — ${stripTags(s.title)}.`;
   let h = head(s, 'Team', { base: '../', docTitle: stripTags(p.name), desc, path: `team/${id}.html`, image: p.photo || null });
+  // Each kind of info (role, appointments, interests, education, contact)
+  // gets its own visually distinct block — a flat run of <p> tags read as
+  // undifferentiated prose, especially once a person has 4-5 of these.
   const lines = [];
   if (roleLabel || p.period) {
     const period = p.period ? `<span class="period">${esc(p.period)}</span>` : '';
-    lines.push(`\t\t\t<p>${[roleLabel ? esc(roleLabel) : '', period].filter(Boolean).join(', ')}</p>`);
+    lines.push(`\t\t\t<p class="role">${[roleLabel ? esc(roleLabel) : '', period].filter(Boolean).join(', ')}</p>`);
   }
-  (p.lines || []).forEach(l => lines.push(`\t\t\t<p>${l}</p>`));
-  if (p.interests) lines.push(`\t\t\t<p>Interests: ${esc(p.interests)}</p>`);
+  if (p.lines && p.lines.length) {
+    lines.push(`\t\t\t<ul class="cv-lines">\n${p.lines.map(l => `\t\t\t\t<li>${l}</li>`).join('\n')}\n\t\t\t</ul>`);
+  }
   if (p.bio) lines.push(`\t\t\t<div class="post-body">${p.bio}</div>`);
+  if (p.interests) {
+    lines.push(`\t\t\t<h5>Interests</h5>`);
+    lines.push(`\t\t\t<p>${esc(p.interests)}</p>`);
+  }
   if (p.education && p.education.length) {
     lines.push(`\t\t\t<h5>Education</h5>`);
     lines.push(`\t\t\t<ul>\n${p.education.map(educationLi).join('\n')}\n\t\t\t</ul>`);
   }
-  if (p.email) lines.push(`\t\t\t<p>Email: <a href="mailto:${esc(p.email)}">${esc(p.email)}</a></p>`);
-  const links = linksHtml(p.links);
-  if (links) lines.push(`\t\t\t${links}`);
+  if (p.email || (p.links && p.links.length)) {
+    lines.push(`\t\t\t<h5>Contact</h5>`);
+    if (p.email) lines.push(`\t\t\t<p>Email: <a href="mailto:${esc(p.email)}">${esc(p.email)}</a></p>`);
+    const links = linksHtml(p.links);
+    if (links) lines.push(`\t\t\t${links}`);
+  }
   h += `
 \t<div class="section">
 \t\t<p class="crumb"><a href="team.html">&larr; Team</a></p>

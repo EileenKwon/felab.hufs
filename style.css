@@ -725,6 +725,35 @@ dl.news .tag {
 	color: #555;
 }
 
+.person-detail .role {
+	font-weight: 600;
+	color: #0B3D6E;
+	margin: 2px 0 12px;
+}
+
+.person-detail .cv-lines {
+	margin: 0 0 14px;
+	padding-left: 18px;
+}
+
+.person-detail .cv-lines li {
+	margin-bottom: 6px;
+	line-height: 1.5;
+}
+
+.person-detail h5 {
+	margin: 18px 0 6px;
+	font-size: 0.85em;
+	font-weight: normal;
+	text-transform: uppercase;
+	letter-spacing: 1.5px;
+	color: #555;
+}
+
+.person-detail h5:first-of-type {
+	margin-top: 4px;
+}
+
 @media (max-width: 640px) {
 	.person-detail .photo { float: none; margin: 0 0 14px; }
 }
