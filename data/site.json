@@ -51,9 +51,9 @@
       "Assistant Professor, Division of Finance &amp; AI, Hankuk University of Foreign Studies (since March 2025)",
       "Postdoctoral Researcher, Department of Industrial Engineering, UNIST",
       "Ph.D. in Industrial and Systems Engineering, KAIST",
-      "Sejong Science Fellowship, National Research Foundation of Korea (2024)",
-      "Research: financial data science, machine learning for finance, AI mathematics"
+      "Sejong Science Fellowship, National Research Foundation of Korea (2024)"
     ],
+    "interests": "Financial Data Science, Machine Learning for Finance, AI Mathematics",
     "email": "gho3283@hufs.ac.kr",
     "links": []
   },
@@ -106,7 +106,7 @@
       "role": "Undergraduate Researcher",
       "period": "2025-12 ~ Present",
       "photo": "images/gakyungkwon.png",
-      "interests": "",
+      "interests": "AI for Finance, Portfolio Optimization, Reinforcement Learning, Knowledge-Aware AI, and Decision-Making under Uncertainty",
       "email": "eileenk@hufs.ac.kr",
       "links": [
         {
