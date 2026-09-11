@@ -370,7 +370,7 @@ function pagePersonDetail(data, p, roleLabel) {
   if (links) lines.push(`\t\t\t${links}`);
   h += `
 \t<div class="section">
-\t\t<p class="crumb"><a href="../team.html">&larr; Team</a></p>
+\t\t<p class="crumb"><a href="team.html">&larr; Team</a></p>
 \t\t<article class="post single person-detail" id="${esc(id)}">
 \t\t\t<div class="photo">${p.photo ? `<img src="${esc(p.photo)}" alt="${esc(p.name)}">` : ''}</div>
 \t\t\t<h2 class="post-title">${esc(p.name)}${p.korean ? ` <span class="post-kr">(${esc(p.korean)})</span>` : ''}</h2>

@@ -16,6 +16,14 @@ h1, h2, h3, h4 {
 	color: #1A1A1A;
 }
 
+/* The serif body font's bold weight reads close to regular at 16px, so bold
+   text (lab director in author lists, etc.) also gets a color shift to stay
+   legible at a glance. */
+b, strong {
+	font-weight: bold;
+	color: #0B3D6E;
+}
+
 h2 {
 	font-size: 1.05em;
 	text-transform: uppercase;
