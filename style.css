@@ -175,6 +175,21 @@ a:hover { border-bottom-color: #0B3D6E; }
 	margin-bottom: 28px;
 }
 
+a.person {
+	color: inherit;
+	border-bottom: none;
+	border-radius: 4px;
+	transition: box-shadow 0.15s;
+}
+
+a.person:hover {
+	box-shadow: 0 2px 10px rgba(11, 61, 110, 0.12);
+}
+
+a.person:hover .bio h4 {
+	color: #0B3D6E;
+}
+
 .person .photo {
 	flex: 0 0 150px;
 	width: 150px;
@@ -461,7 +476,7 @@ dl.projects dd {
 	margin-bottom: 4px;
 }
 
-/* Category chip, on post pages and on the blog cards */
+/* Category chip, on post pages, blog cards and News entries */
 .tag {
 	display: inline-block;
 	padding: 0 8px;
@@ -472,6 +487,21 @@ dl.projects dd {
 
 .post-meta .tag {
 	font-size: 0.95em;
+}
+
+/* Category colors, shared by News and Blog/Activities. Kept in the same
+   muted, unfilled key as the site's existing navy .tag — only the text/
+   border hue shifts per category, no background fills. */
+.tag.cat-paper      { border-color: #B7C6D8; color: #0B3D6E; }
+.tag.cat-conference { border-color: #C3CEDA; color: #3A5A78; }
+.tag.cat-award      { border-color: #D9CFB0; color: #6E5A2E; }
+.tag.cat-seminar    { border-color: #CFC7DB; color: #5A4E70; }
+.tag.cat-social     { border-color: #DDC7BC; color: #7A4A3A; }
+.tag.cat-milestone  { border-color: #C9CFD6; color: #47525E; }
+
+dl.news .tag {
+	font-size: 0.85em;
+	margin-right: 2px;
 }
 
 .post-kr {
@@ -663,6 +693,32 @@ dl.projects dd {
 
 .person .period {
 	color: #555;
+}
+
+/* Team member detail page */
+
+.person-detail .photo {
+	float: left;
+	width: 150px;
+	height: 190px;
+	margin: 4px 24px 10px 0;
+	background: #EEE;
+	border: 1px solid #DDD;
+}
+
+.person-detail .photo img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.person-detail .period {
+	color: #555;
+}
+
+@media (max-width: 640px) {
+	.person-detail .photo { float: none; margin: 0 0 14px; }
 }
 
 /* A single gallery image keeps its own proportions (screenshots, posters) */

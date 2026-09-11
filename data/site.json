@@ -371,41 +371,52 @@
   "news": [
     {
       "date": "2026-08",
+      "type": "paper",
       "short": "Preprint on controlling investment bias in LLMs posted on arXiv.",
       "text": "Preprint \"Your AI, On a Dial: Controlling Investment Bias in LLMs with a Single Neuron\" posted on arXiv. First author Sahong Park is an undergraduate researcher in the lab. [<a href=\"https://arxiv.org/pdf/2608.22852\" target=\"_blank\">paper</a>]"
     },
     {
       "date": "2026-08",
+      "type": "paper",
       "short": "Seq2Synth accepted to CIKM 2026.",
       "text": "\"Seq2Synth: Benchmarking Temporal Fidelity in Synthetic Sequential Tabular Data\" accepted to CIKM 2026. [<a href=\"https://arxiv.org/pdf/2607.15606\" target=\"_blank\">paper</a>]"
     },
     {
       "date": "2026-07",
+      "type": "paper",
       "short": "Seq2Synth preprint posted on arXiv.",
       "text": "Preprint \"Seq2Synth: Benchmarking Temporal Fidelity in Synthetic Sequential Tabular Data\" posted on arXiv."
     },
     {
       "date": "2026-06",
+      "type": "conference",
       "short": "Sahong Park presented at the Financial AI session of the 2026 Spring Joint Conference.",
       "text": "Undergraduate researcher Sahong Park gave an oral presentation, \"GerberShrink: Correlation-based Portfolio Optimization\", at the Financial AI special session of the 2026 Spring Joint Conference of KORMS, KIIE, and the Korea Society for Simulation, held at HICO in Gyeongju. [<a href=\"blog/2026-06-kiie.html\">blog</a>]"
     },
     {
       "date": "2025-12",
+      "type": "paper",
       "short": "Paper on high-cost patient prediction published in <i>EAAI</i>.",
       "text": "\"Machine Learning for Disease-Specific Prediction of High-Cost Patients\" published in <i>Engineering Applications of Artificial Intelligence</i>. [<a href=\"https://doi.org/10.1016/j.engappai.2025.112200\" target=\"_blank\">paper</a>]"
     },
     {
       "date": "2025-11",
+      "type": "award",
       "short": "Hyunmo Goo won the top prize at the HUFS Student Research Program.",
       "text": "Undergraduate researcher Hyunmo Goo received the top prize (Humanities and Social Sciences division) at the first HUFS Student Research Program presentation, for \"Meta-XGBoost: A Robust Ensemble for Molecular Solubility Prediction\". [<a href=\"blog/2025-11-award.html\">blog</a>]"
     },
     {
       "date": "2025-03",
+      "type": "milestone",
       "short": "Prof. Hyeongwoo Kong joins HUFS.",
       "text": "Prof. Hyeongwoo Kong joins the Division of Finance &amp; AI at HUFS as Assistant Professor."
     }
   ],
   "blogCategories": {
+    "paper": {
+      "icon": "📄",
+      "name": "Paper"
+    },
     "award": {
       "icon": "🏆",
       "name": "Award"
