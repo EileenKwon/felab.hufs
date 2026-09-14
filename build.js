@@ -165,7 +165,7 @@ function foot(site) {
 
 function authorsHtml(authors, data) {
   const director = data.professor.name.trim();
-  const members = new Set(data.members.map(m => m.name.trim()));
+  const members = new Map(data.members.map(m => [m.name.trim(), memberId(m)]));
   return authors.split(',').map(raw => {
     let n = raw.trim();
     if (!n) return '';
@@ -173,7 +173,7 @@ function authorsHtml(authors, data) {
     if (/[†*]$/.test(n)) { corr = true; n = n.slice(0, -1).trim(); }
     let h = esc(n);
     if (n === director) h = `<b>${h}</b>`;
-    else if (members.has(n)) h = `<u>${h}</u>`;
+    else if (members.has(n)) h = memberLink(members.get(n), h);
     return h + (corr ? '&dagger;' : '');
   }).filter(Boolean).join(', ');
 }
@@ -206,25 +206,29 @@ function pubLi(p, data, cites) {
   return `<li>${authorsHtml(p.authors, data)} (${p.year}). ${p.title}. ${venue}${note}.${links}${cited}${bib}</li>`;
 }
 
+// A member's name links to the member's page under team/. The `member` class
+// keeps the underline look the legend promises.
+function memberLink(id, html) { return `<a class="member" href="team/${id}.html">${html}</a>`; }
+
 const LEGEND = '<p class="legend"><b>Bold</b>: lab director &middot; <u>Underlined</u>: lab members &middot; &dagger;: corresponding author</p>';
 
-// Underlines lab member names wherever they appear in a piece of hand-written
+// Links lab member names wherever they appear in a piece of hand-written
 // HTML (News entries). Only text between tags is touched, so names inside an
-// href or an attribute are left alone, and a name already inside <u> is not
-// wrapped twice.
+// href or an attribute are left alone, and a name already inside <a> or <u>
+// is not wrapped again.
 function markMembers(html, data) {
-  const names = data.members.map(m => m.name.trim()).filter(Boolean)
-    .sort((a, b) => b.length - a.length);
+  const ids = new Map(data.members.map(m => [m.name.trim(), memberId(m)]));
+  const names = [...ids.keys()].filter(Boolean).sort((a, b) => b.length - a.length);
   if (!names.length) return html;
   const re = new RegExp('(?<![\\w-])(' + names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')(?![\\w-])', 'g');
   let depth = 0;
   return String(html).split(/(<[^>]+>)/).map(seg => {
     if (seg.startsWith('<')) {
-      if (/^<u[\s>]/i.test(seg)) depth++;
-      else if (/^<\/u\s*>/i.test(seg)) depth = Math.max(0, depth - 1);
+      if (/^<(a|u)[\s>]/i.test(seg)) depth++;
+      else if (/^<\/(a|u)\s*>/i.test(seg)) depth = Math.max(0, depth - 1);
       return seg;
     }
-    return depth > 0 ? seg : seg.replace(re, '<u>$1</u>');
+    return depth > 0 ? seg : seg.replace(re, (_, n) => memberLink(ids.get(n), n));
   }).join('');
 }
 

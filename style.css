@@ -354,11 +354,14 @@ dl.projects dd {
 	margin: -4px 0 16px;
 }
 
-.pub-list u, .legend u {
+.pub-list u, .legend u, a.member {
 	text-decoration: underline;
 	text-underline-offset: 3px;
 	text-decoration-color: #0B3D6E;
 }
+
+a.member { color: inherit; border: none; }
+a.member:hover { color: #0B3D6E; }
 
 /* Team member page */
 
