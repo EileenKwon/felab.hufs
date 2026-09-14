@@ -13,4 +13,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hwkong1993.github.io/felab.hufs/sitemap.xml
+Sitemap: https://felab.hufs.ac.kr/sitemap.xml
