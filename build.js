@@ -370,7 +370,9 @@ ${ind}</${small ? 'a' : 'div'}>`;
 function pageMember(data, m) {
   const s = data.site;
   const id = memberId(m);
-  const ld = { '@type': 'Person', name: m.name, alternateName: m.korean, jobTitle: m.role, email: m.email, url: abs(s, `team/${id}.html`), image: m.photo ? abs(s, m.photo) : undefined, affiliation: orgLd(s), sameAs: (m.links || []).map(l => l.url), knowsAbout: m.interests ? m.interests.split(',').map(x => x.trim()) : undefined };
+  // ProfilePage is the Google rich-result type for a person page; bare Person is not.
+  const person = { '@type': 'Person', name: m.name, alternateName: m.korean, jobTitle: m.role, email: m.email, url: abs(s, `team/${id}.html`), image: m.photo ? abs(s, m.photo) : undefined, affiliation: orgLd(s), sameAs: (m.links || []).map(l => l.url), knowsAbout: m.interests ? m.interests.split(',').map(x => x.trim()) : undefined };
+  const ld = { '@type': 'ProfilePage', mainEntity: person };
   let h = head(s, 'Team', { base: '../', docTitle: m.name, desc: `${m.name}, ${m.role || 'member'} of the ${stripTags(s.title)} at ${stripTags(s.titleSuffix)}.${m.interests ? ' Interests: ' + m.interests + '.' : ''}`, path: `team/${id}.html`, image: m.photo || null, ld });
   const role = [m.role ? esc(m.role) : '', m.period ? `<span class="period">${esc(m.period)}</span>` : ''].filter(Boolean).join(', ');
   const contact = [];
