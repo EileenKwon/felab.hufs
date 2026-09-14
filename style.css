@@ -34,6 +34,8 @@ h2 {
 h3 {
 	font-size: 1.2em;
 	margin-top: 1.4em;
+	font-weight: bold;
+	color: #0B3D6E;
 }
 
 p, ul, ol { margin-top: 0; }
@@ -271,11 +273,14 @@ dl.news dd {
 dl.projects dt {
 	margin-top: 18px;
 	font-size: 1.05em;
+	font-weight: bold;
+	color: #0B3D6E;
 }
 
 dl.projects dt span {
 	display: block;
 	font-size: 0.85em;
+	font-weight: normal;
 	color: #555;
 	letter-spacing: 0.5px;
 }
@@ -1177,6 +1182,35 @@ details.bib > pre {
 
 .globe-trips button.on .n { background: #fff; }
 .globe-trips button.on .when { color: #CFD9E5; }
+
+/* Year color key for the destination pins. */
+.globe-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px 16px;
+	margin: 10px 0 0;
+	font-size: 0.8em;
+	color: #555;
+}
+
+.globe-legend .key {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.globe-legend .key i {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.globe-legend .key.planned i {
+	background: #fff;
+	border: 1px dashed #8B95A1;
+}
 
 .globe-hint {
 	font-size: 0.8em;
