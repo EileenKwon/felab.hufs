@@ -13,7 +13,6 @@ const MENU = [
   ['research.html', 'Research'],
   ['projects.html', 'Projects'],
   ['publications.html', 'Publications'],
-  ['courses.html', 'Courses'],
   ['news.html', 'News'],
 ];
 
@@ -70,6 +69,16 @@ function metaDesc(text, limit = 200) {
   return t.length > limit ? t.slice(0, limit - 1).replace(/\s+\S*$/, '') + '…' : t;
 }
 
+// schema.org node for the lab, reused as publisher/affiliation on other pages.
+function orgLd(site) {
+  const org = { '@type': 'ResearchOrganization', name: stripTags(site.title), url: abs(site, '') };
+  if (site.subtitle) org.alternateName = stripTags(site.subtitle).split('·')[0].trim();
+  if (site.ogImage) org.logo = abs(site, site.ogImage);
+  if (site.contact && site.contact.email) org.email = site.contact.email;
+  if (site.footer && site.footer.logoUrl) org.parentOrganization = { '@type': 'CollegeOrUniversity', name: 'Hankuk University of Foreign Studies', url: site.footer.logoUrl };
+  return org;
+}
+
 function head(site, pageTitle, opts) {
   const o = opts || {};
   const baseHref = o.base;
@@ -89,6 +98,8 @@ function head(site, pageTitle, opts) {
   if (canonical) meta.push(`<meta property="og:url" content="${esc(canonical)}">`);
   if (image) meta.push(`<meta property="og:image" content="${esc(image)}">`);
   meta.push(`<meta name="twitter:card" content="summary_large_image">`);
+  // "<" escaped so a "</script>" inside a value cannot end the block early.
+  if (o.ld && site.url) meta.push(`<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', ...o.ld }).replace(/</g, '\\u003c')}</script>`);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -154,7 +165,7 @@ function foot(site) {
 
 function authorsHtml(authors, data) {
   const director = data.professor.name.trim();
-  const members = new Set(data.members.map(m => m.name.trim()));
+  const members = new Map(data.members.map(m => [m.name.trim(), personId(m)]));
   return authors.split(',').map(raw => {
     let n = raw.trim();
     if (!n) return '';
@@ -162,7 +173,7 @@ function authorsHtml(authors, data) {
     if (/[†*]$/.test(n)) { corr = true; n = n.slice(0, -1).trim(); }
     let h = esc(n);
     if (n === director) h = `<b>${h}</b>`;
-    else if (members.has(n)) h = `<u>${h}</u>`;
+    else if (members.has(n)) h = memberLink(members.get(n), h);
     return h + (corr ? '&dagger;' : '');
   }).filter(Boolean).join(', ');
 }
@@ -195,25 +206,29 @@ function pubLi(p, data, cites) {
   return `<li>${authorsHtml(p.authors, data)} (${p.year}). ${p.title}. ${venue}${note}.${links}${cited}${bib}</li>`;
 }
 
+// A member's name links to the member's page under team/. The `member` class
+// keeps the underline look the legend promises.
+function memberLink(id, html) { return `<a class="member" href="team/${id}.html">${html}</a>`; }
+
 const LEGEND = '<p class="legend"><b>Bold</b>: lab director &middot; <u>Underlined</u>: lab members &middot; &dagger;: corresponding author</p>';
 
-// Underlines lab member names wherever they appear in a piece of hand-written
+// Links lab member names wherever they appear in a piece of hand-written
 // HTML (News entries). Only text between tags is touched, so names inside an
-// href or an attribute are left alone, and a name already inside <u> is not
-// wrapped twice.
+// href or an attribute are left alone, and a name already inside <a> or <u>
+// is not wrapped again.
 function markMembers(html, data) {
-  const names = data.members.map(m => m.name.trim()).filter(Boolean)
-    .sort((a, b) => b.length - a.length);
+  const ids = new Map(data.members.map(m => [m.name.trim(), personId(m)]));
+  const names = [...ids.keys()].filter(Boolean).sort((a, b) => b.length - a.length);
   if (!names.length) return html;
   const re = new RegExp('(?<![\\w-])(' + names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')(?![\\w-])', 'g');
   let depth = 0;
   return String(html).split(/(<[^>]+>)/).map(seg => {
     if (seg.startsWith('<')) {
-      if (/^<u[\s>]/i.test(seg)) depth++;
-      else if (/^<\/u\s*>/i.test(seg)) depth = Math.max(0, depth - 1);
+      if (/^<(a|u)[\s>]/i.test(seg)) depth++;
+      else if (/^<\/(a|u)\s*>/i.test(seg)) depth = Math.max(0, depth - 1);
       return seg;
     }
-    return depth > 0 ? seg : seg.replace(re, '<u>$1</u>');
+    return depth > 0 ? seg : seg.replace(re, (_, n) => memberLink(ids.get(n), n));
   }).join('');
 }
 
@@ -284,7 +299,9 @@ function pageIndex(data) {
   const s = data.site;
   const selected = data.publications.filter(p => p.selected);
   const recent = data.news.slice(0, s.recentCount || 3);
-  let h = head(s, '', { desc: s.about[0], path: 'index.html' });
+  const prof = data.professor;
+  const ld = { ...orgLd(s), member: { '@type': 'Person', name: prof.name, alternateName: prof.korean, jobTitle: 'Assistant Professor', email: prof.email, image: prof.photo ? abs(s, prof.photo) : undefined } };
+  let h = head(s, '', { desc: s.about[0], path: 'index.html', ld });
   h += `
 \t<div class="columns">
 \t\t<div class="main">
@@ -355,7 +372,10 @@ function pagePersonDetail(data, p, roleLabel) {
   const s = data.site;
   const id = personId(p);
   const desc = `${stripTags(p.name)}${roleLabel ? `, ${stripTags(roleLabel)}` : ''} — ${stripTags(s.title)}.`;
-  let h = head(s, 'Team', { base: '../', docTitle: stripTags(p.name), desc, path: `team/${id}.html`, image: p.photo || null });
+  // ProfilePage is the Google rich-result type for a person page; bare Person is not.
+  const person = { '@type': 'Person', name: p.name, alternateName: p.korean, jobTitle: roleLabel, email: p.email, url: abs(s, `team/${id}.html`), image: p.photo ? abs(s, p.photo) : undefined, affiliation: orgLd(s), sameAs: (p.links || []).map(l => l.url), knowsAbout: p.interests ? p.interests.split(',').map(x => x.trim()) : undefined };
+  const ld = { '@type': 'ProfilePage', mainEntity: person };
+  let h = head(s, 'Team', { base: '../', docTitle: stripTags(p.name), desc, path: `team/${id}.html`, image: p.photo || null, ld });
   // Each kind of info (role, appointments, interests, education, contact)
   // gets its own visually distinct block — a flat run of <p> tags read as
   // undifferentiated prose, especially once a person has 4-5 of these.
@@ -381,6 +401,20 @@ function pagePersonDetail(data, p, roleLabel) {
     if (p.email) lines.push(`\t\t\t<p>Email: <a href="mailto:${esc(p.email)}">${esc(p.email)}</a></p>`);
     const links = linksHtml(p.links);
     if (links) lines.push(`\t\t\t${links}`);
+  }
+  // The lab's publications this person is an author of, newest first.
+  const name = p.name.trim();
+  const pubs = data.publications
+    .filter(pub => pub.authors.split(',').some(a => a.trim().replace(/[†*]$/, '').trim() === name))
+    .sort((a, b) => b.year - a.year);
+  if (pubs.length) {
+    lines.push(`\t\t\t<h5>Publications</h5>`);
+    lines.push(`\t\t\t<ul class="pub-list">\n${pubs.map(pub => '\t\t\t\t' + pubLi(pub, data, data.citations)).join('\n')}\n\t\t\t</ul>`);
+  }
+  // Papers the person is reading at the moment: one hand-written HTML line each.
+  if ((p.reading || []).length) {
+    lines.push(`\t\t\t<h5>Currently Reading</h5>`);
+    lines.push(`\t\t\t<ul class="pub-list">\n${p.reading.map(r => `\t\t\t\t<li>${r}</li>`).join('\n')}\n\t\t\t</ul>`);
   }
   h += `
 \t<div class="section">
@@ -408,7 +442,7 @@ ${personCard(data.professor, 'Professor', `team/${personId(data.professor)}.html
 
 \t\t<h3 id="join">Joining the Lab</h3>
 \t\t<p>${data.joining}</p>
-\t</div>
+${data.resources ? `\t\t<h3 id="resources">Research Resources</h3>\n\t\t${data.resources}\n` : ''}\t</div>
 `;
   // group members preserving first-seen group order
   const groups = [];
@@ -510,33 +544,6 @@ ${theses.map(p => '\t\t\t' + pubLi(p, data, cites)).join('\n')}
   return h + foot(s);
 }
 
-// Course rows. Only the first row of a run of the same semester is labelled;
-// the rest show a repeat mark so the semester groups read at a glance.
-function semesterRows(courses) {
-  let prev = null;
-  return courses.map(c => {
-    const cell = c.semester === prev ? '<span class="rep">--</span>' : esc(c.semester);
-    prev = c.semester;
-    return `\t\t\t<tr><td>${cell}</td><td>${esc(c.title)}</td><td>${esc(c.level)}</td></tr>`;
-  }).join('\n');
-}
-
-function pageCourses(data) {
-  const s = data.site;
-  let h = head(s, 'Courses', { desc: data.coursesIntro || '', path: 'courses.html' });
-  h += `
-\t<div class="section">
-\t\t<h2>Courses</h2>
-\t\t<p>${data.coursesIntro || ''}</p>
-\t\t<table class="plain">
-\t\t\t<tr><th>Semester</th><th>Course</th><th>Level</th></tr>
-${semesterRows(data.courses)}
-\t\t</table>
-\t</div>
-`;
-  return h + foot(s);
-}
-
 function pageNews(data) {
   const s = data.site;
   let h = head(s, 'News', { desc: `News from the ${stripTags(s.title)}. ${data.news.slice(0, 2).map(n => stripTags(n.short || n.text)).join(' ')}`, path: 'news.html' });
@@ -564,7 +571,9 @@ function slug(s) {
   return String(s).toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'post';
 }
 
-function sortedPosts(data) { return (data.blog || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || '')); }
+// Hidden posts stay off the list, the feed and the sitemap and get no page;
+// only the globe (all = true) still draws them, as planned trips.
+function sortedPosts(data, all) { return (data.blog || []).filter(p => all || !p.hidden).sort((a, b) => (b.date || '').localeCompare(a.date || '')); }
 function photosOf(p) { return (p.photos || []).filter(x => x && x.url); }
 
 // "2026-03-05" -> "March 5, 2026"; "2026-03" -> "March 2026".
@@ -606,7 +615,10 @@ ${p.titleKr ? `\t\t\t\t\t<p class="post-kr">${p.titleKr}</p>\n` : ''}\t\t\t\t\t<
 // Conference-trip globe. A post takes part when its "route" lists places
 // (separated by ">") that are all in data.places. The drawing is done by
 // globe.js in the browser; here only the data and the static frame are
-// written, so the page still reads fine without JavaScript.
+// written, so the page still reads fine without JavaScript. A hidden post's
+// route is drawn as planned: no page to link to, no photos, "(예정)" after the
+// name. A post's "logo" (the conference's logo or banner) is shown at the
+// centre of the globe when its route is picked, planned or not.
 function tripsOf(data, posts) {
   const places = data.places || {};
   const trips = [];
@@ -619,12 +631,14 @@ function tripsOf(data, posts) {
       continue;
     }
     trips.push({
-      label: stripTags(p.tripLabel || p.title),
+      label: stripTags(p.tripLabel || p.title) + (p.hidden ? ' (예정)' : ''),
       date: p.date,
       when: dateLong(String(p.date || '').slice(0, 7)),
-      href: `blog/${postId(p)}.html`,
+      hidden: !!p.hidden,
+      href: p.hidden ? null : `blog/${postId(p)}.html`,
       path,
-      photos: photosOf(p).map(x => ({ url: x.url, caption: x.caption || '' })),
+      logo: p.logo || null,
+      photos: p.hidden ? [] : photosOf(p).map(x => ({ url: x.url, caption: x.caption || '' })),
     });
   }
   return trips;
@@ -640,8 +654,8 @@ function globeSection(data, posts) {
   const payload = JSON.stringify({ places: used, trips, noPhotos: g.noPhotos || 'No photos yet. Read the post \u2192' })
     .replace(/</g, '\\u003c').replace(/-->/g, '--\\u003e');
   const buttons = trips.map((t, i) =>
-    `\t\t\t\t<button type="button" data-trip="${i}"><span class="n">${i + 1}</span>${esc(t.label)}<span class="when">${esc(t.path[t.path.length - 1])}, ${esc(t.when)}</span></button>`).join('\n');
-  const list = trips.map(t => `\t\t\t\t<li><a href="${esc(t.href)}">${esc(t.label)}</a> — ${esc(t.path.join(' → '))}, ${esc(t.when)}</li>`).join('\n');
+    `\t\t\t\t<button type="button" data-trip="${i}"${t.hidden ? ' class="planned"' : ''}><span class="n">${i + 1}</span>${esc(t.label)}<span class="when">${esc(t.path[t.path.length - 1])}, ${esc(t.when)}</span></button>`).join('\n');
+  const list = trips.map(t => `\t\t\t\t<li>${t.href ? `<a href="${esc(t.href)}">${esc(t.label)}</a>` : esc(t.label)} — ${esc(t.path.join(' → '))}, ${esc(t.when)}</li>`).join('\n');
   return `\t\t<div class="globe" id="globe">
 \t\t\t<h3>${esc(g.title || 'Conference trips')}</h3>
 \t\t\t<div class="globe-stage">
@@ -712,7 +726,7 @@ function pageBlog(data) {
 \t\t<h2>${esc(blogLabel(s))}</h2>
 ${intro ? `\t\t<p class="blog-intro">${intro}</p>\n` : ''}`;
   if (!posts.length) return h + `\t\t<p>No posts yet.</p>\n\t</div>\n` + foot(s);
-  const globe = globeSection(data, posts);
+  const globe = globeSection(data, sortedPosts(data, true));
   h += globe;
 
   // The inputs come first: the rules above reach the buttons and the cards
@@ -749,7 +763,9 @@ function pagePost(data, p) {
   if (chip) meta.push(chip);
   if (p.location) meta.push(esc(p.location));
   const photos = photosOf(p);
-  let h = head(s, 'Blog', { base: '../', docTitle: stripTags(p.title), desc: postSummary(p), path: `blog/${postId(p)}.html`, image: photos.length ? photos[0].url : null, type: 'article' });
+  const url = abs(s, `blog/${postId(p)}.html`);
+  const ld = { '@type': 'BlogPosting', headline: stripTags(p.title), alternativeHeadline: p.titleKr ? stripTags(p.titleKr) : undefined, datePublished: p.date, description: stripTags(postSummary(p)), image: photos.length ? abs(s, photos[0].url) : undefined, url, mainEntityOfPage: url, author: orgLd(s), publisher: orgLd(s) };
+  let h = head(s, 'Blog', { base: '../', docTitle: stripTags(p.title), desc: postSummary(p), path: `blog/${postId(p)}.html`, image: photos.length ? photos[0].url : null, type: 'article', ld });
   h += `
 \t<div class="section blog">
 \t\t<p class="crumb"><a href="blog.html">&larr; ${esc(blogLabel(s))}</a></p>
@@ -810,6 +826,9 @@ function sitemapXml(data, pageFiles) {
   const s = data.site;
   const postDate = {};
   for (const p of (data.blog || [])) postDate['blog/' + postId(p) + '.html'] = p.date;
+  // The blog index changes whenever a post is published.
+  const newest = sortedPosts(data)[0];
+  if (newest) postDate['blog.html'] = newest.date;
   const urls = pageFiles.map(f => {
     const lastmod = postDate[f] ? `\n\t\t<lastmod>${postDate[f]}</lastmod>` : '';
     return `\t<url>\n\t\t<loc>${esc(abs(s, f))}</loc>${lastmod}\n\t</url>`;
@@ -821,8 +840,12 @@ ${urls}
 `;
 }
 
+// The comment block at the top of the existing robots.txt (a note to whoever
+// reads it) is kept as written there; only the rules under it are regenerated.
 function robotsTxt(data) {
-  return `User-agent: *\nAllow: /\n\nSitemap: ${abs(data.site, 'sitemap.xml')}\n`;
+  let note = '';
+  try { note = (fs.readFileSync(path.join(ROOT, 'robots.txt'), 'utf8').match(/^(#.*\r?\n)+/) || [''])[0]; } catch (e) {}
+  return `${note}${note ? '\n' : ''}User-agent: *\nAllow: /\n\nSitemap: ${abs(data.site, 'sitemap.xml')}\n`;
 }
 
 function build() {
@@ -836,7 +859,6 @@ function build() {
     'research.html': pageResearch,
     'projects.html': pageProjects,
     'publications.html': pagePublications,
-    'courses.html': pageCourses,
     'news.html': pageNews,
     'blog.html': pageBlog,
   };
@@ -847,7 +869,7 @@ function build() {
   const dir = path.join(ROOT, 'blog');
   fs.mkdirSync(dir, { recursive: true });
   const keep = new Set();
-  for (const p of (data.blog || [])) {
+  for (const p of sortedPosts(data)) {
     const name = postId(p) + '.html';
     keep.add(name);
     fs.writeFileSync(path.join(dir, name), pagePost(data, p), 'utf8');

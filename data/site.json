@@ -3,7 +3,7 @@
     "title": "Financial Engineering Lab.",
     "subtitle": "금융공학연구실 · Division of Finance &amp; AI, Hankuk University of Foreign Studies",
     "titleSuffix": "HUFS",
-    "url": "https://hwkong1993.github.io/felab.hufs",
+    "url": "https://felab.hufs.ac.kr",
     "ogImage": "images/og.png",
     "notice": {
       "enabled": true,
@@ -51,13 +51,14 @@
       "Assistant Professor, Division of Finance &amp; AI, Hankuk University of Foreign Studies (since March 2025)",
       "Postdoctoral Researcher, Department of Industrial Engineering, UNIST",
       "Ph.D. in Industrial and Systems Engineering, KAIST",
-      "Sejong Science Fellowship, National Research Foundation of Korea (2024)"
+      "Principal Investigator, Sejong Science Fellowship (General Track), NRF Korea, 2024–2029"
     ],
     "interests": "Financial Data Science, Machine Learning for Finance, AI Mathematics",
     "email": "gho3283@hufs.ac.kr",
     "links": []
   },
   "joining": "Undergraduate and graduate students at HUFS who are interested in finance, statistics, and machine learning are welcome to contact <a href=\"mailto:gho3283@hufs.ac.kr\">gho3283@hufs.ac.kr</a> with a short introduction and CV.",
+  "resources": "<p>Computing resources available through the Division of Finance &amp; AI:</p><ul><li>26 GPUs across 5 servers<ul><li>8× NVIDIA RTX PRO 6000 Blackwell (96 GB)</li><li>12× NVIDIA RTX 4090 (24 GB)</li><li>2× NVIDIA L40S (48 GB)</li></ul></li><li>Shared via a GPU reservation system</li></ul>",
   "members": [
     {
       "name": "Sahong Park",
@@ -81,6 +82,11 @@
           "type": "github",
           "url": "https://github.com/ripepersimmon"
         }
+      ],
+      "reading": [
+        "Hyunglip Bae, Haeun Jeon, Minsu Park, Yongjae Lee, Woo Chang Kim (2025). A Cholesky Decomposition-Based Asset Selection Heuristic for Sparse Tangent Portfolio Optimization. <i>arXiv preprint</i>. [<a href=\"https://doi.org/10.48550/arXiv.2502.11701\" target=\"_blank\" rel=\"noopener\">paper</a>]",
+        "Haeun Jeon, Seunghoon Choi, Hyunglip Bae, Yongjae Lee, Woo Chang Kim (2026). Decision-Focused Sparse Tangent Portfolio Optimization. <i>ICML 2026</i>. [<a href=\"https://doi.org/10.48550/arXiv.2607.00581\" target=\"_blank\" rel=\"noopener\">paper</a>]",
+        "Yongjae Lee, Min Jeong Kim, Jang Ho Kim, Ju Ri Jang, Woo Chang Kim (2020). Sparse and robust portfolio selection via semi-definite relaxation. <i>Journal of the Operational Research Society</i>. [<a href=\"https://doi.org/10.1080/01605682.2019.1581408\" target=\"_blank\" rel=\"noopener\">paper</a>]"
       ]
     },
     {
@@ -97,7 +103,8 @@
           "type": "github",
           "url": "https://github.com/Tuesdayand"
         }
-      ]
+      ],
+      "reading": []
     },
     {
       "name": "Gakyung Kwon",
@@ -113,7 +120,8 @@
           "type": "linkedin",
           "url": "https://www.linkedin.com/in/gakyung-kwon/"
         }
-      ]
+      ],
+      "reading": []
     },
     {
       "name": "Jongmin Lee",
@@ -129,7 +137,8 @@
           "type": "linkedin",
           "url": "https://www.linkedin.com/in/%EC%A2%85%EB%AF%BC-%EC%9D%B4-226ba3337/"
         }
-      ]
+      ],
+      "reading": []
     }
   ],
   "research": [
@@ -277,7 +286,7 @@
       "type": "journal",
       "selected": true,
       "venue": "Intelligent Systems in Accounting, Finance and Management",
-      "note": "JCR Q2",
+      "note": "JCR Q1",
       "links": [
         {
           "label": "paper",
@@ -311,63 +320,6 @@
       "links": []
     }
   ],
-  "courses": [
-    {
-      "semester": "Fall 2026",
-      "title": "Data Management and SQL (데이터관리와SQL)",
-      "level": "Undergraduate, 2nd year",
-      "code": "M02209101"
-    },
-    {
-      "semester": "Fall 2026",
-      "title": "Learning Python Statistics (파이썬통계학습)",
-      "level": "Undergraduate, 2nd year",
-      "code": "M02203101"
-    },
-    {
-      "semester": "Fall 2026",
-      "title": "Finance & AI Capstone (Advanced) (Finance&AI융합캡스톤심화)",
-      "level": "Undergraduate, 4th year",
-      "code": "M02408101"
-    },
-    {
-      "semester": "Spring 2026",
-      "title": "Investment science and Optimization (투자론과최적화)",
-      "level": "Undergraduate, 3rd year",
-      "code": "M02308101"
-    },
-    {
-      "semester": "Spring 2026",
-      "title": "Finance and AI Capstone (Finance&AI융합캡스톤)",
-      "level": "Undergraduate, 4th year",
-      "code": "M02403101"
-    },
-    {
-      "semester": "Fall 2025",
-      "title": "Investment science and Optimization (투자론과최적화)",
-      "level": "Undergraduate, 3rd year",
-      "code": "M02308101"
-    },
-    {
-      "semester": "Fall 2025",
-      "title": "Convex Optimization (컨벡스최적화)",
-      "level": "Undergraduate, 4th year",
-      "code": "M02402101"
-    },
-    {
-      "semester": "Spring 2025",
-      "title": "Learning Python Statistics (파이썬통계학습)",
-      "level": "Undergraduate, 2nd year",
-      "code": "M02203101"
-    },
-    {
-      "semester": "Spring 2025",
-      "title": "Data Mining (데이터마이닝)",
-      "level": "Undergraduate, 3rd year",
-      "code": "M02301101"
-    }
-  ],
-  "coursesIntro": "Courses taught by Prof. Kong in the Division of Finance &amp; AI, HUFS Global Campus. The list is taken from the university timetable system.",
   "news": [
     {
       "date": "2026-08",
@@ -456,6 +408,8 @@
       "links": [],
       "route": "",
       "tripLabel": "",
+      "logo": "",
+      "hidden": false,
       "id": "2026-09-website"
     },
     {
@@ -500,6 +454,8 @@
       ],
       "route": "Seoul > Gyeongju",
       "tripLabel": "2026 춘계공동학술대회",
+      "logo": "",
+      "hidden": false,
       "id": "2026-06-kiie"
     },
     {
@@ -528,6 +484,8 @@
       ],
       "route": "",
       "tripLabel": "",
+      "logo": "",
+      "hidden": false,
       "id": "2025-11-award"
     },
     {
@@ -560,6 +518,8 @@
       ],
       "route": "Seoul > Singapore",
       "tripLabel": "AAAI-26",
+      "logo": "images/blog/logos/aaai26.png",
+      "hidden": false,
       "id": "2026-01-aaai"
     },
     {
@@ -596,7 +556,30 @@
       ],
       "route": "Seoul > Singapore",
       "tripLabel": "ICAIF 2025",
+      "logo": "images/blog/logos/icaif25.png",
+      "hidden": false,
       "id": "2025-11-icaif"
+    },
+    {
+      "date": "2026-11-14",
+      "type": "conference",
+      "location": "Università Bocconi",
+      "title": "ICAIF 2026",
+      "titleKr": "",
+      "summary": "2026년 11월 14일부터 17일까지 진행되는 ICAIF 2026에 견학 예정입니다.",
+      "text": "<p>ICAIF 2026 견학 예정<p>",
+      "photos": [],
+      "links": [
+        {
+          "label": "ICAIF 2026 website",
+          "url": "https://icaif2026.org/"
+        }
+      ],
+      "route": "Seoul > Milan",
+      "tripLabel": "ICAIF 2026",
+      "logo": "images/blog/logos/icaif26.svg",
+      "hidden": true,
+      "id": ""
     }
   ],
   "places": {
@@ -611,6 +594,10 @@
     "Gyeongju": [
       35.8531,
       129.227
+    ],
+    "Milan": [
+      45.4669,
+      9.19
     ]
   }
 }

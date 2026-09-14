@@ -183,6 +183,7 @@ a:hover { border-bottom-color: #0B3D6E; }
 	margin-bottom: 28px;
 }
 
+/* A member card is a link to the member's own page. */
 a.person {
 	color: inherit;
 	border-bottom: none;
@@ -196,6 +197,10 @@ a.person:hover {
 
 a.person:hover .bio h4 {
 	color: #0B3D6E;
+}
+
+a.person .bio .interests {
+	color: #555;
 }
 
 .person .photo {
@@ -219,29 +224,6 @@ a.person:hover .bio h4 {
 
 .person .bio p {
 	margin: 0 0 6px;
-}
-
-table.plain {
-	border-collapse: collapse;
-	width: 100%;
-	font-size: 0.95em;
-}
-
-table.plain th,
-table.plain td {
-	text-align: left;
-	padding: 8px 10px 8px 0;
-	border-bottom: 1px solid #E5E5E5;
-	vertical-align: top;
-}
-
-table.plain th {
-	font-weight: normal;
-	color: #555;
-	font-size: 0.85em;
-	letter-spacing: 1px;
-	text-transform: uppercase;
-	border-bottom: 1px solid #1A1A1A;
 }
 
 dl.news dt {
@@ -392,10 +374,73 @@ dl.projects dd {
 	margin: -4px 0 16px;
 }
 
-.pub-list u, .legend u {
+.pub-list u, .legend u, a.member {
 	text-decoration: underline;
 	text-underline-offset: 3px;
 	text-decoration-color: #0B3D6E;
+}
+
+a.member { color: inherit; border: none; }
+a.member:hover { color: #0B3D6E; }
+
+/* Team member page */
+
+/* The photo sits in a column of its own, so short text never slips under it. */
+.post.person-detail {
+	position: relative;
+	padding: 6px 0 26px 184px;
+	min-height: 200px;
+}
+
+.person-detail .photo {
+	position: absolute;
+	left: 0;
+	top: 4px;
+	width: 150px;
+	height: 190px;
+	background: #EEE;
+	border: 1px solid #DDD;
+}
+
+.person-detail .photo img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.person-detail .role {
+	font-weight: 600;
+	color: #0B3D6E;
+	margin: 2px 0 12px;
+}
+
+.person-detail .period { color: #555; font-weight: normal; }
+
+.person-detail h5 {
+	margin: 18px 0 6px;
+	font-size: 0.85em;
+	font-weight: normal;
+	text-transform: uppercase;
+	letter-spacing: 1.5px;
+	color: #555;
+}
+
+.person-detail .links { margin-top: 4px; }
+
+.person-detail .links a {
+	display: inline-block;
+	color: #0B3D6E;
+	border: none;
+	vertical-align: middle;
+	margin-right: 8px;
+}
+
+.person-detail .links svg { display: block; }
+
+@media (max-width: 640px) {
+	.post.person-detail { padding-left: 0; min-height: 0; }
+	.person-detail .photo { position: static; margin: 0 0 14px; }
 }
 
 /* Bold member names */
@@ -493,7 +538,7 @@ dl.projects dd {
 	display: inline-block;
 	padding: 0 8px;
 	border: 1px solid #B7C6D8;
-	border-radius: 10px;
+	border-radius: 0;
 	color: #0B3D6E;
 }
 
@@ -576,7 +621,7 @@ dl.news .tag {
 .cards {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
-	gap: 24px;
+	gap: 14px;
 	margin: 14px 0 30px;
 }
 
@@ -584,7 +629,7 @@ dl.news .tag {
 	display: flex;
 	flex-direction: column;
 	border: 1px solid #DDD;
-	border-radius: 4px;
+	border-radius: 0;
 	background: #fff;
 	color: #1A1A1A;
 	overflow: hidden;
@@ -794,11 +839,6 @@ dl.news .tag {
 
 .post-links li {
 	margin-bottom: 4px;
-}
-
-/* Repeat mark in the Courses semester column */
-table.plain .rep {
-	color: #AAA;
 }
 
 /* Publications toolbar: year jump links and totals */
@@ -1029,6 +1069,36 @@ details.bib > pre {
 	line-height: 1.4;
 }
 
+/* The conference logo, hung like a banner over the top of the globe: logo on
+   the left, the trip's name beside it. */
+.gphoto.glogo {
+	width: auto;
+	max-width: 280px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 16px 8px 10px;
+}
+
+.gphoto.glogo img {
+	aspect-ratio: auto;
+	width: auto;
+	max-width: 160px;
+	height: 44px;
+	object-fit: contain;
+	background: none;
+}
+
+.gphoto.glogo figcaption {
+	padding: 0;
+	font-style: italic;
+	font-size: 0.85em;
+	white-space: nowrap;
+	color: #B4262A;
+}
+
+.gphoto.glogo.planned figcaption { color: #8B95A1; }
+
 .gphoto:hover { border-color: #0B3D6E; z-index: 2; }
 
 /* Zoom buttons in the corner of the stage; the wheel and pinch do the same. */
@@ -1095,6 +1165,10 @@ details.bib > pre {
 
 .globe-trips button:hover { border-color: #0B3D6E; color: #0B3D6E; }
 
+/* Planned trips: the post is hidden, only its route is on the globe. */
+.globe-trips button.planned { color: #777; border-style: dashed; }
+.globe-trips button.planned .n { color: #777; }
+
 .globe-trips button.on {
 	border-color: #0B3D6E;
 	background: #0B3D6E;
@@ -1129,4 +1203,6 @@ details.bib > pre {
 		transition: opacity 0.35s;
 	}
 	.gphoto.in, .gphoto.out { transform: none; }
+	/* The logo banner takes a row of its own above the photos. */
+	.gphoto.glogo { width: 100%; max-width: none; justify-content: center; }
 }

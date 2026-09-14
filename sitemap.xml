@@ -1,62 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/index.html</loc>
+		<loc>https://felab.hufs.ac.kr/index.html</loc>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/team.html</loc>
+		<loc>https://felab.hufs.ac.kr/team.html</loc>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/research.html</loc>
+		<loc>https://felab.hufs.ac.kr/research.html</loc>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/projects.html</loc>
+		<loc>https://felab.hufs.ac.kr/projects.html</loc>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/publications.html</loc>
+		<loc>https://felab.hufs.ac.kr/publications.html</loc>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/courses.html</loc>
+		<loc>https://felab.hufs.ac.kr/news.html</loc>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/news.html</loc>
-	</url>
-	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/blog.html</loc>
-	</url>
-	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/blog/2026-09-website.html</loc>
+		<loc>https://felab.hufs.ac.kr/blog.html</loc>
 		<lastmod>2026-09-10</lastmod>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/blog/2026-06-kiie.html</loc>
+		<loc>https://felab.hufs.ac.kr/blog/2026-09-website.html</loc>
+		<lastmod>2026-09-10</lastmod>
+	</url>
+	<url>
+		<loc>https://felab.hufs.ac.kr/blog/2026-06-kiie.html</loc>
 		<lastmod>2026-06-04</lastmod>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/blog/2025-11-award.html</loc>
-		<lastmod>2025-11-06</lastmod>
-	</url>
-	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/blog/2026-01-aaai.html</loc>
+		<loc>https://felab.hufs.ac.kr/blog/2026-01-aaai.html</loc>
 		<lastmod>2026-01-20</lastmod>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/blog/2025-11-icaif.html</loc>
+		<loc>https://felab.hufs.ac.kr/blog/2025-11-icaif.html</loc>
 		<lastmod>2025-11-15</lastmod>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/team/hyeongwoo-kong.html</loc>
+		<loc>https://felab.hufs.ac.kr/blog/2025-11-award.html</loc>
+		<lastmod>2025-11-06</lastmod>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/team/sahong-park.html</loc>
+		<loc>https://felab.hufs.ac.kr/team/hyeongwoo-kong.html</loc>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/team/hyunmo-goo.html</loc>
+		<loc>https://felab.hufs.ac.kr/team/sahong-park.html</loc>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/team/gakyung-kwon.html</loc>
+		<loc>https://felab.hufs.ac.kr/team/hyunmo-goo.html</loc>
 	</url>
 	<url>
-		<loc>https://hwkong1993.github.io/felab.hufs/team/jongmin-lee.html</loc>
+		<loc>https://felab.hufs.ac.kr/team/gakyung-kwon.html</loc>
+	</url>
+	<url>
+		<loc>https://felab.hufs.ac.kr/team/jongmin-lee.html</loc>
 	</url>
 </urlset>
