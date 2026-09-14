@@ -423,7 +423,7 @@ ${personCard(data.professor, false)}
 
 \t\t<h3 id="join">Joining the Lab</h3>
 \t\t<p>${data.joining}</p>
-\t</div>
+${data.resources ? `\t\t<h3 id="resources">Research Resources</h3>\n\t\t${data.resources}\n` : ''}\t</div>
 `;
   // group members preserving first-seen group order
   const groups = [];
