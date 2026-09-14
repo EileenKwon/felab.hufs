@@ -102,7 +102,8 @@
           "type": "github",
           "url": "https://github.com/Tuesdayand"
         }
-      ]
+      ],
+      "reading": []
     },
     {
       "name": "Gakyung Kwon",
@@ -118,7 +119,8 @@
           "type": "linkedin",
           "url": "https://www.linkedin.com/in/gakyung-kwon/"
         }
-      ]
+      ],
+      "reading": []
     },
     {
       "name": "Jongmin Lee",
@@ -134,7 +136,8 @@
           "type": "linkedin",
           "url": "https://www.linkedin.com/in/%EC%A2%85%EB%AF%BC-%EC%9D%B4-226ba3337/"
         }
-      ]
+      ],
+      "reading": []
     }
   ],
   "research": [
@@ -282,7 +285,7 @@
       "type": "journal",
       "selected": true,
       "venue": "Intelligent Systems in Accounting, Finance and Management",
-      "note": "JCR Q2",
+      "note": "JCR Q1",
       "links": [
         {
           "label": "paper",
@@ -393,6 +396,7 @@
       "links": [],
       "route": "",
       "tripLabel": "",
+      "logo": "",
       "hidden": false,
       "id": "2026-09-website"
     },
@@ -438,9 +442,9 @@
       ],
       "route": "Seoul > Gyeongju",
       "tripLabel": "2026 춘계공동학술대회",
+      "logo": "",
       "hidden": false,
-      "id": "2026-06-kiie",
-      "logo": ""
+      "id": "2026-06-kiie"
     },
     {
       "date": "2025-11-06",
@@ -468,6 +472,7 @@
       ],
       "route": "",
       "tripLabel": "",
+      "logo": "",
       "hidden": false,
       "id": "2025-11-award"
     },
@@ -501,9 +506,9 @@
       ],
       "route": "Seoul > Singapore",
       "tripLabel": "AAAI-26",
+      "logo": "images/blog/logos/aaai26.png",
       "hidden": false,
-      "id": "2026-01-aaai",
-      "logo": "images/blog/logos/aaai26.png"
+      "id": "2026-01-aaai"
     },
     {
       "date": "2025-11-15",
@@ -539,9 +544,9 @@
       ],
       "route": "Seoul > Singapore",
       "tripLabel": "ICAIF 2025",
+      "logo": "images/blog/logos/icaif25.png",
       "hidden": false,
-      "id": "2025-11-icaif",
-      "logo": "images/blog/logos/icaif25.png"
+      "id": "2025-11-icaif"
     },
     {
       "date": "2026-11-14",
@@ -560,9 +565,9 @@
       ],
       "route": "Seoul > Milan",
       "tripLabel": "ICAIF 2026",
+      "logo": "images/blog/logos/icaif26.svg",
       "hidden": true,
-      "id": "",
-      "logo": "images/blog/logos/icaif26.svg"
+      "id": ""
     }
   ],
   "places": {
