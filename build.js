@@ -69,6 +69,16 @@ function metaDesc(text, limit = 200) {
   return t.length > limit ? t.slice(0, limit - 1).replace(/\s+\S*$/, '') + '…' : t;
 }
 
+// schema.org node for the lab, reused as publisher/affiliation on other pages.
+function orgLd(site) {
+  const org = { '@type': 'ResearchOrganization', name: stripTags(site.title), url: abs(site, '') };
+  if (site.subtitle) org.alternateName = stripTags(site.subtitle).split('·')[0].trim();
+  if (site.ogImage) org.logo = abs(site, site.ogImage);
+  if (site.contact && site.contact.email) org.email = site.contact.email;
+  if (site.footer && site.footer.logoUrl) org.parentOrganization = { '@type': 'CollegeOrUniversity', name: 'Hankuk University of Foreign Studies', url: site.footer.logoUrl };
+  return org;
+}
+
 function head(site, pageTitle, opts) {
   const o = opts || {};
   const baseHref = o.base;
@@ -88,6 +98,8 @@ function head(site, pageTitle, opts) {
   if (canonical) meta.push(`<meta property="og:url" content="${esc(canonical)}">`);
   if (image) meta.push(`<meta property="og:image" content="${esc(image)}">`);
   meta.push(`<meta name="twitter:card" content="summary_large_image">`);
+  // "<" escaped so a "</script>" inside a value cannot end the block early.
+  if (o.ld && site.url) meta.push(`<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', ...o.ld }).replace(/</g, '\\u003c')}</script>`);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -283,7 +295,9 @@ function pageIndex(data) {
   const s = data.site;
   const selected = data.publications.filter(p => p.selected);
   const recent = data.news.slice(0, s.recentCount || 3);
-  let h = head(s, '', { desc: s.about[0], path: 'index.html' });
+  const prof = data.professor;
+  const ld = { ...orgLd(s), member: { '@type': 'Person', name: prof.name, alternateName: prof.korean, jobTitle: 'Assistant Professor', email: prof.email, image: prof.photo ? abs(s, prof.photo) : undefined } };
+  let h = head(s, '', { desc: s.about[0], path: 'index.html', ld });
   h += `
 \t<div class="columns">
 \t\t<div class="main">
@@ -356,7 +370,8 @@ ${ind}</${small ? 'a' : 'div'}>`;
 function pageMember(data, m) {
   const s = data.site;
   const id = memberId(m);
-  let h = head(s, 'Team', { base: '../', docTitle: m.name, desc: `${m.name}, ${m.role || 'member'} of the ${stripTags(s.title)} at ${stripTags(s.titleSuffix)}.${m.interests ? ' Interests: ' + m.interests + '.' : ''}`, path: `team/${id}.html`, image: m.photo || null });
+  const ld = { '@type': 'Person', name: m.name, alternateName: m.korean, jobTitle: m.role, email: m.email, url: abs(s, `team/${id}.html`), image: m.photo ? abs(s, m.photo) : undefined, affiliation: orgLd(s), sameAs: (m.links || []).map(l => l.url), knowsAbout: m.interests ? m.interests.split(',').map(x => x.trim()) : undefined };
+  let h = head(s, 'Team', { base: '../', docTitle: m.name, desc: `${m.name}, ${m.role || 'member'} of the ${stripTags(s.title)} at ${stripTags(s.titleSuffix)}.${m.interests ? ' Interests: ' + m.interests + '.' : ''}`, path: `team/${id}.html`, image: m.photo || null, ld });
   const role = [m.role ? esc(m.role) : '', m.period ? `<span class="period">${esc(m.period)}</span>` : ''].filter(Boolean).join(', ');
   const contact = [];
   if (m.email) contact.push(`<p>Email: <a href="mailto:${esc(m.email)}">${esc(m.email)}</a></p>`);
@@ -726,7 +741,9 @@ function pagePost(data, p) {
   if (chip) meta.push(chip);
   if (p.location) meta.push(esc(p.location));
   const photos = photosOf(p);
-  let h = head(s, 'Blog', { base: '../', docTitle: stripTags(p.title), desc: postSummary(p), path: `blog/${postId(p)}.html`, image: photos.length ? photos[0].url : null, type: 'article' });
+  const url = abs(s, `blog/${postId(p)}.html`);
+  const ld = { '@type': 'BlogPosting', headline: stripTags(p.title), alternativeHeadline: p.titleKr ? stripTags(p.titleKr) : undefined, datePublished: p.date, description: stripTags(postSummary(p)), image: photos.length ? abs(s, photos[0].url) : undefined, url, mainEntityOfPage: url, author: orgLd(s), publisher: orgLd(s) };
+  let h = head(s, 'Blog', { base: '../', docTitle: stripTags(p.title), desc: postSummary(p), path: `blog/${postId(p)}.html`, image: photos.length ? photos[0].url : null, type: 'article', ld });
   h += `
 \t<div class="section blog">
 \t\t<p class="crumb"><a href="blog.html">&larr; ${esc(blogLabel(s))}</a></p>
@@ -787,6 +804,9 @@ function sitemapXml(data, pageFiles) {
   const s = data.site;
   const postDate = {};
   for (const p of (data.blog || [])) postDate['blog/' + postId(p) + '.html'] = p.date;
+  // The blog index changes whenever a post is published.
+  const newest = sortedPosts(data)[0];
+  if (newest) postDate['blog.html'] = newest.date;
   const urls = pageFiles.map(f => {
     const lastmod = postDate[f] ? `\n\t\t<lastmod>${postDate[f]}</lastmod>` : '';
     return `\t<url>\n\t\t<loc>${esc(abs(s, f))}</loc>${lastmod}\n\t</url>`;
