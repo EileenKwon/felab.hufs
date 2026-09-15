@@ -546,21 +546,27 @@ ${theses.map(p => '\t\t\t' + pubLi(p, data, cites)).join('\n')}
 
 function pageNews(data) {
   const s = data.site;
+  const years = [...new Set(data.news.map(n => n.date.slice(0, 4)))].sort((a, b) => b - a);
   let h = head(s, 'News', { desc: `News from the ${stripTags(s.title)}. ${data.news.slice(0, 2).map(n => stripTags(n.short || n.text)).join(' ')}`, path: 'news.html' });
   h += `
 \t<div class="section">
 \t\t<h2>News</h2>
+\t\t<p class="news-tools"><span class="jump">${years.map(y => `<a href="#y${y}">${y}</a>`).join(' ')}</span></p>
+`;
+  for (const y of years) {
+    h += `
+\t\t<h3 class="year-heading" id="y${y}">${y}</h3>
 \t\t<dl class="news">
 `;
-  let last = null;
-  for (const n of data.news) {
-    if (n.date !== last) { h += `\t\t\t<dt>${dateLong(n.date)}</dt>\n`; last = n.date; }
-    const chip = catChip(data.blogCategories || {}, n.type);
-    h += `\t\t\t<dd>${chip ? chip + ' ' : ''}${markMembers(n.text, data)}</dd>\n`;
+    let last = null;
+    for (const n of data.news.filter(n => n.date.slice(0, 4) === y)) {
+      if (n.date !== last) { h += `\t\t\t<dt>${dateLong(n.date)}</dt>\n`; last = n.date; }
+      const chip = catChip(data.blogCategories || {}, n.type);
+      h += `\t\t\t<dd>${chip ? chip + ' ' : ''}${markMembers(n.text, data)}</dd>\n`;
+    }
+    h += `\t\t</dl>\n`;
   }
-  h += `\t\t</dl>
-\t</div>
-`;
+  h += `\t</div>\n`;
   return h + foot(s);
 }
 
