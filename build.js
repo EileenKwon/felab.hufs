@@ -561,8 +561,7 @@ function pageNews(data) {
     let last = null;
     for (const n of data.news.filter(n => n.date.slice(0, 4) === y)) {
       if (n.date !== last) { h += `\t\t\t<dt>${dateLong(n.date)}</dt>\n`; last = n.date; }
-      const chip = catChip(data.blogCategories || {}, n.type);
-      h += `\t\t\t<dd>${chip ? chip + ' ' : ''}${markMembers(n.text, data)}</dd>\n`;
+      h += `\t\t\t<dd>${markMembers(n.text, data)}</dd>\n`;
     }
     h += `\t\t</dl>\n`;
   }
