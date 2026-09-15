@@ -139,15 +139,24 @@ a:hover { border-bottom-color: #0B3D6E; }
 }
 
 .pub-list li {
-	margin-bottom: 12px;
+	margin-bottom: 18px;
 	padding-left: 1.4em;
 	text-indent: -1.4em;
+}
+
+/* The paper title is the unit readers scan for; bolding it (without the
+   director's navy — that color is reserved for the "lab director" legend
+   key in the author list on the same line) keeps titles visually separate
+   from one another without adding a rule/divider between entries. */
+.pub-title {
+	font-weight: bold;
 }
 
 .year-heading {
 	margin-top: 1.6em;
 	font-size: 1em;
-	color: #555;
+	font-weight: bold;
+	color: #0B3D6E;
 	letter-spacing: 1px;
 }
 

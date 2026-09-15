@@ -203,7 +203,7 @@ function pubLi(p, data, cites) {
   const c = citeCount(p, cites);
   const cited = c ? ` <span class="cited">Cited by <a href="${esc(c.url)}" target="_blank" rel="noopener">${c.count}</a></span>` : '';
   const bib = `<details class="bib"><summary>bib</summary><pre>${esc(bibEntry(p))}</pre></details>`;
-  return `<li>${authorsHtml(p.authors, data)} (${p.year}). ${p.title}. ${venue}${note}.${links}${cited}${bib}</li>`;
+  return `<li>${authorsHtml(p.authors, data)} (${p.year}). <span class="pub-title">${p.title}</span>. ${venue}${note}.${links}${cited}${bib}</li>`;
 }
 
 // A member's name links to the member's page under team/. The `member` class
