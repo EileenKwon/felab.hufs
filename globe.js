@@ -117,6 +117,10 @@ function placeVec(name) { var p = places[name]; return p ? vec(p[0], p[1]) : nul
 // above the surface so they are never hidden behind the land dots.
 var PIN_LIFT = 0.05, PIN_SPREAD = 0.07;
 var PIN_R = 5.5, PIN_R_ON = 7, PIN_STEM = 1.1;
+// Faint great-circle route lines from home to each destination, reintroduced
+// alongside the year pins (the pins alone dropped the multi-leg path); kept
+// translucent so they read as context under the pins, not the main marker.
+var ROUTE_LIFT = 0.02, ROUTE_N = 48, ROUTE_ALPHA = 0.4;
 // One palette slot per year, oldest first, from the validated categorical
 // order (dataviz skill) — never reused for interaction state (hover/select
 // stay red/navy) so a pin's hue always means one thing: when the trip was.
@@ -159,6 +163,17 @@ trips.forEach(function (t, i) {
   t.index = i;
   t.vecs = t.path.map(placeVec);
   t.dest = t.vecs[t.vecs.length - 1];
+  // Sample each leg of the path as a lifted great-circle arc (bowed up in the
+  // middle so overlapping legs stay readable), for the faint route line.
+  t.samples = [];
+  for (var leg = 0; leg + 1 < t.vecs.length; leg++) {
+    var a = t.vecs[leg], b = t.vecs[leg + 1];
+    for (var k = 0; k <= ROUTE_N; k++) {
+      var u = k / ROUTE_N, p = slerp(a, b, u), w = Math.sin(Math.PI * u);
+      var h = (1 + ROUTE_LIFT * w) / Math.hypot(p[0], p[1], p[2]);
+      t.samples.push([p[0] * h, p[1] * h, p[2] * h]);
+    }
+  }
   if (!origins[t.path[0]]) origins[t.path[0]] = t.vecs[0];
   var key = t.path[t.path.length - 1], n = destGroups[key], j = destPlaced[key] || 0;
   destPlaced[key] = j + 1;
@@ -251,6 +266,22 @@ function draw() {
   }
   ctx.fillStyle = NAVY; ctx.fill();
 
+  // Route lines: a faint great-circle path from home to each destination, so a
+  // multi-leg trip reads as a path and not just an isolated pin. Colored like
+  // the trip's pin but kept translucent, and drawn under the pins/labels.
+  for (i = 0; i < trips.length; i++) {
+    var rt = trips[i], onR = (rt === selected || rt === hover);
+    ctx.beginPath();
+    polyline(rt.samples);
+    ctx.strokeStyle = rt.hidden ? GREY_ON : (yearColor[rt.year] || GREY_ON);
+    ctx.lineWidth = onR ? 1.6 : 1;
+    ctx.globalAlpha = selected && !onR ? 0.15 : ROUTE_ALPHA;
+    if (rt.hidden) ctx.setLineDash([3, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.globalAlpha = 1;
+
   // Markers are drawn first and staked out as label obstacles, then every
   // label is placed in a second pass — so a label never lands on a pin that
   // happens to be drawn after it (Seoul and Gyeongju sit close enough on the
@@ -338,6 +369,18 @@ function line(fn, n) {
   var pen = false;
   for (var k = 0; k <= n; k++) {
     var r = rot(fn(k / n));
+    if (r[0] <= 0.001) { pen = false; continue; }
+    var x = CX + R * r[1], y = CY - R * r[2];
+    if (pen) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+    pen = true;
+  }
+}
+// Same as line(), but over a precomputed list of vecs (a trip's route samples)
+// instead of a parametric function.
+function polyline(vecs) {
+  var pen = false;
+  for (var k = 0; k < vecs.length; k++) {
+    var r = rot(vecs[k]);
     if (r[0] <= 0.001) { pen = false; continue; }
     var x = CX + R * r[1], y = CY - R * r[2];
     if (pen) ctx.lineTo(x, y); else ctx.moveTo(x, y);
