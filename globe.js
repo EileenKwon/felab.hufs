@@ -113,33 +113,47 @@ function placeVec(name) { var p = places[name]; return p ? vec(p[0], p[1]) : nul
 
 // Each trip is a pin at its destination, not a line: the point reads faster
 // than a bundle of great-circle arcs once there are more than a couple of
-// trips, and it is what lets the pin carry a year color. Pins float a little
-// above the surface so they are never hidden behind the land dots.
+// trips, and it is what lets the pin carry a country color. Pins float a
+// little above the surface so they are never hidden behind the land dots.
 var PIN_LIFT = 0.05, PIN_SPREAD = 0.07;
 var PIN_R = 5.5, PIN_R_ON = 7, PIN_STEM = 1.1;
 // Faint great-circle route lines from home to each destination, reintroduced
-// alongside the year pins (the pins alone dropped the multi-leg path); kept
-// translucent so they read as context under the pins, not the main marker.
+// alongside the country pins (the pins alone dropped the multi-leg path);
+// kept translucent so they read as context under the pins, not the main
+// marker.
 var ROUTE_LIFT = 0.02, ROUTE_N = 48, ROUTE_ALPHA = 0.4;
-// One palette slot per year, oldest first, from the validated categorical
+// Destination place → country. Not derived from lat/lon (a bounding-box test
+// gets border cases like Russia/Turkey wrong), so this is maintained by hand
+// alongside `places` in data/site.json — add an entry whenever a trip visits
+// a place in a country not already listed here.
+var COUNTRY_OF = {
+  Seoul: 'Korea',
+  Gyeongju: 'Korea',
+  Singapore: 'Singapore',
+  Milan: 'Italy'
+};
+// One palette slot per country, alphabetical, from the validated categorical
 // order (dataviz skill) — never reused for interaction state (hover/select
-// stay red/navy) so a pin's hue always means one thing: when the trip was.
-var YEAR_PALETTE = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
-var years = [];
-trips.forEach(function (t) { t.year = String(t.date || '').slice(0, 4); if (!t.hidden && years.indexOf(t.year) < 0) years.push(t.year); });
-years.sort();
-var yearColor = {};
-years.forEach(function (y, i) { yearColor[y] = YEAR_PALETTE[i % YEAR_PALETTE.length]; });
+// stay red/navy) so a pin's hue always means one thing: which country.
+var PALETTE = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
+var countries = [];
+trips.forEach(function (t) {
+  t.country = COUNTRY_OF[t.path[t.path.length - 1]] || 'Other';
+  if (!t.hidden && countries.indexOf(t.country) < 0) countries.push(t.country);
+});
+countries.sort();
+var countryColor = {};
+countries.forEach(function (c, i) { countryColor[c] = PALETTE[i % PALETTE.length]; });
 
-// A small color key so the pins' years read without hovering each one.
+// A small color key so the pins' countries read without hovering each one.
 (function () {
   var legend = wrap.querySelector('.globe-legend');
   if (!legend) return;
-  years.forEach(function (y) {
+  countries.forEach(function (c) {
     var k = el('span', 'key');
-    var sw = el('i'); sw.style.background = yearColor[y];
+    var sw = el('i'); sw.style.background = countryColor[c];
     k.appendChild(sw);
-    k.appendChild(document.createTextNode(y));
+    k.appendChild(document.createTextNode(c));
     legend.appendChild(k);
   });
   if (trips.some(function (t) { return t.hidden; })) {
@@ -157,7 +171,7 @@ var destGroups = {};
 trips.forEach(function (t) { var k = t.path[t.path.length - 1]; destGroups[k] = (destGroups[k] || 0) + 1; });
 var destPlaced = {};
 // Where the lab is based: every trip's first stop, deduped by name, drawn
-// once as a plain home marker (it has no year of its own).
+// once as a plain home marker (it has no country color of its own).
 var origins = {};
 trips.forEach(function (t, i) {
   t.index = i;
@@ -273,7 +287,7 @@ function draw() {
     var rt = trips[i], onR = (rt === selected || rt === hover);
     ctx.beginPath();
     polyline(rt.samples);
-    ctx.strokeStyle = rt.hidden ? GREY_ON : (yearColor[rt.year] || GREY_ON);
+    ctx.strokeStyle = rt.hidden ? GREY_ON : (countryColor[rt.country] || GREY_ON);
     ctx.lineWidth = onR ? 1.6 : 1;
     ctx.globalAlpha = selected && !onR ? 0.15 : ROUTE_ALPHA;
     if (rt.hidden) ctx.setLineDash([3, 3]);
@@ -319,7 +333,7 @@ function draw() {
     ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(cx, cy);
     ctx.strokeStyle = t.hidden ? GREY_ON : NAVY; ctx.lineWidth = 1.3; ctx.stroke();
     ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2);
-    ctx.fillStyle = t.hidden ? '#fff' : (yearColor[t.year] || GREY_ON);
+    ctx.fillStyle = t.hidden ? '#fff' : (countryColor[t.country] || GREY_ON);
     ctx.fill();
     ctx.lineWidth = on ? 2.2 : 1.5;
     ctx.strokeStyle = t.hidden ? GREY_ON : (on ? RED : '#fff');
